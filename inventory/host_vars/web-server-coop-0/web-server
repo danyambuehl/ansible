@@ -1,0 +1,3 @@
+ansible_host: 16.62.49.249
+web_password: coop
+virtualhostname: web-coop

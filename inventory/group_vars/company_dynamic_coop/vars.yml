@@ -1,0 +1,7 @@
+test: abc123
+web_password: coop
+virtualhostname: web-coop
+mysql_db_username: coop_user_db
+mysql_db_password: coop_pw_web
+db_username: coop_user_db
+db_password: coop_pw_web

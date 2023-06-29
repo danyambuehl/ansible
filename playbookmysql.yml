@@ -1,0 +1,23 @@
+---
+# tasks file for mysql
+- name: install mysql
+  hosts: SG_dynamic_dbserver
+  become: true
+
+  tasks:
+  # Uses collection mysql Role to set up a mysql server
+  - include_role:
+      name: mysql
+    # Specifies variables to pass to the role 
+    vars:
+      mysql_db_name: dev
+      mysql_db_username: '{{db_username}}'  # Spaceholdes that are defined in inventory
+      mysql_db_password: '{{db_password}}'
+
+    # Does the same a second time with diffenrent vars
+  - include_role:
+      name: mysql
+    vars:
+      mysql_db_name: prod
+      mysql_db_username: '{{db_username}}'
+      mysql_db_password: '{{db_password}}'

@@ -1,0 +1,77 @@
+- name: install apache
+  # Wo soll der Playbook ausgeführt werden
+  hosts: SG_dynamic_webserver
+  # Welcher User soll verwendet werden
+  remote_user: '{{ ansible_user }}'
+  # Login as User sudo
+  become: true 
+
+  tasks: 
+  # Install python3-passlib (for using htpasswd)
+  - name: install python3-passlib
+    ansible.builtin.package: 
+      name: python3-passlib
+      state: present
+  # Install apache2
+  - name: install apache binary
+    ansible.builtin.package: 
+      name: apache2
+      state: present
+  
+  - name: start apache for me  # Give the Task a name you like 
+    ansible.builtin.service:   # Manage Module von Ansible 
+      name: apache2 
+      state: started # started/stopped are idempotent actions that will not run commands unless necessary.
+      enabled: true   # Whether the service should start on boot.
+
+  - name: Add a user {{ web_username }} to a password file and ensure permissions are set
+    community.general.htpasswd:
+      path: /etc/apache2/passwdfile
+      name: '{{ web_username }}'
+      password: '{{ web_password }}'
+      owner: root
+      group: www-data
+      mode: 0640
+
+  # Create a directory for the virtual host
+  - name: document root for virtual host
+    ansible.builtin.file:
+      path: /var/www/'{{ virtualhostname }}'
+      state: directory
+      owner: root
+      group: www-data
+      mode: 0755
+
+  # Copy the index.html file from templates/index.j2 for the virtual host    
+  - name: index.html for virtual host 
+    ansible.builtin.template:
+      src: templates/index.j2
+      dest: /var/www/'{{ virtualhostname }}'/index.html
+      owner: root
+      group: www-data
+  
+  # Create a config file for the Apache Server copy it from templates/vhost.j2
+  - name: create apache vhost_virtualhostname.conf
+    ansible.builtin.template:
+      src: templates/vhost.j2
+      dest: /etc/apache2/sites-available/'{{ virtualhostname }}'.conf
+      owner: root
+      group: www-data
+    # trigger the reload apache task 
+    notify: reloaded apache
+
+  # Enable the site by creating a symlink from sites-available to sites-enabled
+  - name: enable site 
+    ansible.builtin.file:
+      src: /etc/apache2/sites-available/'{{ virtualhostname }}'.conf
+      dest: /etc/apache2/sites-enabled/'{{ virtualhostname }}'.conf
+      state: link
+    notify: reloaded apache
+
+  # Reload apache if the config file has changed or a new site has been enabled
+  handlers:
+  - name: reloaded apache # Give the Task a name you like 
+    ansible.builtin.service:   # Manage Module von Ansible 
+      name: apache2 
+      state: reloaded # started/stopped are idempotent actions that will not run commands unless necessary.
+      enabled: true   # Whether the service should start on boot.

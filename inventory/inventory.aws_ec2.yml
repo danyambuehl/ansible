@@ -1,0 +1,39 @@
+# Example using filters, ignoring permission errors, and specifying the hostname precedence
+plugin: amazon.aws.aws_ec2
+
+# or you could use Jinja as:
+boto_profile: default
+
+# Populate inventory with instances in these regions
+regions:
+  - eu-central-1
+  - eu-central-2
+
+filters:
+ # All instances with their `instance-state` tag set to `running`
+  instance-state-name: running
+  # All dev and QA hosts
+  tag:type:
+    - web
+    - db
+
+# Defines Groups
+groups:
+  # Migros Group all with migros tag
+  Migros_fix: tags.company is regex('migros')
+  # Migros Group all with migros tag
+  Coop_fix: tags.company == 'coop'
+
+  # "ansible" group and selects hosts where the Name tag matches the pattern managed.* 
+  dbserver_fix: tags.type is regex('db')
+  # "webserver" Group by using a json_query to extract the secuirty group name and search for webserer.
+  webserver_fix: security_groups|json_query("[].group_name") is contains ("webserver")
+
+# specific key-value pairs or conditions within the inventory.
+keyed_groups:
+  # Uses Security Group to create groups from the security group name
+  - prefix: SG_dynamic
+    key: 'security_groups|json_query("[].group_name")'
+  # Use tags "Company" to create groups from  the tag value
+  - prefix: company_dynamic
+    key: 'tags.company'

@@ -1,0 +1,33 @@
+# Installing Packages 
+- name: Install required packages  
+  ansible.builtin.package:
+    name:           # Specify the name of the packages to install
+    - python3-dev
+    - default-libmysqlclient-dev
+    - build-essential
+    - python3-pip
+    - mariadb-server
+    - pkg-config
+    state: present    # packages should be present on the system
+    update_cache: yes # Update the package cache before updating the package
+
+  # This Task installs the python module mysqlclient using the ansible.builtin.pip module
+- name: Install required python modules
+  ansible.builtin.pip:
+    name: mysqlclient
+
+  # 
+- name: Create new databases with name {{mysql_db_name}}
+  community.mysql.mysql_db:
+    name:
+    - '{{mysql_db_name}}'
+    state: present
+
+# Create a new database user with Variable username using the comunity.mysql.mysql_user: Module
+- name: Create DB User {{mysql_db_username}}
+  community.mysql.mysql_user:
+    state: present
+    name: '{{mysql_db_username}}'         # Spaceholder
+    password: '{{mysql_db_password}}'
+    append_privs: true                    # privileges will be added to the end not overwritten like in "false"
+    priv: "{{mysql_db_name}}.*:All,GRANT" # sets Users priv(privileges) on db_name to all and can Grant other users priv as well.

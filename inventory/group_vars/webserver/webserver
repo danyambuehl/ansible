@@ -1,0 +1,3 @@
+web_username: webuser
+web_password: defaultwebpassword
+ansible_user: ubuntu

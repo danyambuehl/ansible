@@ -1,0 +1,9 @@
+- name: install apache
+  hosts: webserver
+  become: true
+  tasks: 
+  - name: reload apache
+    ansible.builtin.shell:
+      cmd: apachectl restart 
+  
+

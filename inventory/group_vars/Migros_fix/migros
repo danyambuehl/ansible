@@ -1,0 +1,7 @@
+web_username: migros_user_web
+web_password: migros_pw_web
+virtualhostname: web-migros
+mysql_db_username: migros_user_db
+mysql_db_password: migros_pw_db
+db_username: migros_user_db
+db_password: migros_pw_web
